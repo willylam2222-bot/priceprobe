@@ -63,6 +63,10 @@ No `pip install`. No config files. Runs anywhere Python 3.8+ runs.
 Schedule `python3 monitor.py` with cron (Mac/Linux) or Task Scheduler (Windows) to get a fresh
 report every morning. Never miss a competitor's price move again.
 
+**No server? Run it free on GitHub.** This repo ships a [GitHub Actions workflow](.github/workflows/monitor.yml)
+that runs the tracker on a daily schedule and uploads the report as an artifact — fork it, drop in your
+`targets.json`, and you get free scheduled monitoring with zero infrastructure.
+
 ---
 
 ## 🚀 Don't want to touch the terminal?

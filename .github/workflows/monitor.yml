@@ -1,0 +1,33 @@
+name: Competitor price check
+
+# Run PriceProbe on a schedule, for free, on GitHub's runners — no server needed.
+# Fork this repo, add your competitor URLs to targets.json, and you get a fresh
+# report as a downloadable artifact every day.
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # daily at 08:00 UTC — adjust to your timezone
+  workflow_dispatch: {}    # ...or run it manually from the Actions tab
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run PriceProbe
+        run: |
+          # Uses your targets.json if present, otherwise the bundled example.
+          [ -f targets.json ] || cp targets.example.json targets.json
+          python3 monitor.py
+
+      - name: Upload the report
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-report
+          path: report.html
+          if-no-files-found: warn
