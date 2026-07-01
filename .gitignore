@@ -1,0 +1,5 @@
+snapshots/
+report.html
+targets.json
+__pycache__/
+.DS_Store
