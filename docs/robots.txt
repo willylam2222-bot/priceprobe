@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://willylam2222-bot.github.io/priceprobe/sitemap.xml
