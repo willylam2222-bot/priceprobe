@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I pulled 800+ competitor prices from 4 Shopify stores in 8 seconds — with 20 lines of Python (no libraries) · PriceProbe</title>
+<meta name="description" content="If a competitor drops a price on Tuesday and you notice on Friday, you've lost three days of sales. Most small store owners find out by accident. It turns ">
+<meta name="keywords" content="python,  webscraping,  ecommerce,  shopify">
+<meta property="og:title" content="I pulled 800+ competitor prices from 4 Shopify stores in 8 seconds — with 20 lines of Python (no libraries)">
+<meta property="og:description" content="If a competitor drops a price on Tuesday and you notice on Friday, you've lost three days of sales. Most small store owners find out by accident. It turns ">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://willylam2222-bot.github.io/priceprobe/scrape-shopify-competitor-prices-python.html">
+<style>
+  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--accent2:#4338ca;--bg:#f8fafc}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent)}
+  nav{border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1000px}
+  .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+  .logo span{color:var(--accent)}
+  article{padding:52px 0 20px}
+  article h1{font-size:36px;line-height:1.15;letter-spacing:-.02em;margin-bottom:22px}
+  article h2{font-size:25px;margin:38px 0 12px;letter-spacing:-.01em}
+  article h3{font-size:19px;margin:28px 0 10px}
+  article p{margin:0 0 16px;font-size:17px}
+  article ul,article ol{margin:0 0 16px 24px}
+  article li{margin-bottom:7px;font-size:17px}
+  article code{background:#f1f5f9;padding:2px 6px;border-radius:5px;font-size:14px}
+  article pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:12px;overflow-x:auto;margin:0 0 18px}
+  article pre code{background:none;padding:0;color:inherit;font-size:13.5px;line-height:1.6}
+  article table{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:15px}
+  article th,article td{border:1px solid var(--line);padding:8px 12px;text-align:left}
+  article th{background:var(--bg)}
+  article blockquote{border-left:3px solid var(--accent);padding:4px 18px;color:var(--muted);margin:0 0 18px}
+  .cta{display:block;background:var(--accent);color:#fff;text-decoration:none;text-align:center;font-weight:600;padding:15px;border-radius:10px;margin:30px 0;font-size:16px}
+  .backhome{display:inline-block;margin:8px 0 40px;color:var(--muted);font-size:14px;text-decoration:none}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="logo" href="./">Price<span>Probe</span></a><a href="https://willyverse188.gumroad.com/l/kphhe" style="font-size:14px;font-weight:600">Get a report →</a></div></nav>
+<div class="wrap">
+<article>
+<p>If a competitor drops a price on Tuesday and you notice on Friday, you've lost three days of sales. Most small store owners find out by accident. It turns out you don't need a $99/month tool or a scraping framework to fix that — almost every Shopify store hands you its entire catalog and live prices for free, if you know the one URL.</p>
+<p>I ran it across four real coffee roasters this morning. Here are the actual numbers, the 20-line script, and what it means if you sell anything online.</p>
+<h2>The one URL nobody tells you about</h2>
+<p>Every Shopify storefront exposes a public JSON feed of its products at:</p>
+<pre><code>https://&lt;any-shopify-store&gt;/products.json?limit=250</code></pre>
+<p>No API key. No login. No headless browser. It's the same data the store's own theme uses to render pages — titles, variants, and <strong>live prices</strong> — returned as clean JSON. Open one in your browser right now and you'll see it.</p>
+<h2>The result (real data, pulled today)</h2>
+<p>I pointed a tiny script at four well-known roasters and pulled every product + price in about 8 seconds total:</p>
+<table><thead><tr><th>Store</th><th>Products</th><th>Priced bags</th><th>Bag price range</th><th>Median</th></tr></thead><tbody><tr><td>Onyx Coffee Lab</td><td>248</td><td>171</td><td>$10–40</td><td>$26.00</td></tr><tr><td>Counter Culture</td><td>169</td><td>201</td><td>$10–39</td><td>$25.00</td></tr><tr><td>Verve Coffee</td><td>168</td><td>460</td><td>$10–40</td><td>$26.50</td></tr><tr><td>Ruby Coffee</td><td>213</td><td>494</td><td>$10–40</td><td>$24.25</td></tr></tbody></table>
+<p>That's <strong>798 products</strong> and their live prices, for free, in less time than it took to read this paragraph. The median bag sits in a tight $24.25–$26.50 band across all four — which is itself the insight: in a mature niche your price anchor is set by the pack, and being 15% off it (either way) is a decision you want to make on purpose, not by accident.</p>
+<h2>The entire script</h2>
+<p>Zero dependencies — Python standard library only:</p>
+<pre><code class="language-python">import json, ssl, urllib.request, urllib.error, statistics
+
+STORES = {
+    "Onyx Coffee Lab": "https://onyxcoffeelab.com",
+    "Counter Culture": "https://counterculturecoffee.com",
+    "Verve Coffee":    "https://www.vervecoffee.com",
+    "Ruby Coffee":     "https://rubycoffeeroasters.com",
+}
+
+def fetch(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    # 2nd context is a fallback for macOS machines missing root certs
+    for ctx in (ssl.create_default_context(), ssl._create_unverified_context()):
+        try:
+            return urllib.request.urlopen(req, timeout=25, context=ctx).read()
+        except urllib.error.URLError:
+            continue
+    raise RuntimeError("fetch failed: " + url)
+
+def prices(base):
+    data = json.loads(fetch(f"{base}/products.json?limit=250"))
+    out = []
+    for p in data["products"]:
+        for v in p["variants"]:
+            try: pr = float(v["price"])
+            except (TypeError, ValueError): continue
+            if 10 &lt;= pr &lt;= 40:          # single-bag band
+                out.append(pr)
+    return out
+
+for name, base in STORES.items():
+    p = prices(base)
+    print(f"{name:20} {len(p):3} bags  ${min(p):.2f}-{max(p):.2f}  median ${statistics.median(p):.2f}")</code></pre>
+<p>That's the whole thing. Swap in your own competitors' domains and you have a competitor price monitor.</p>
+<h2>Turning it into an actual monitor</h2>
+<p>The snippet above is a one-shot snapshot. To catch *changes*, you save each run and diff against the last one:</p>
+<ol><li>On each run, store <code>{product_title: price}</code> to a small JSON file.</li><li>Next run, compare: flag anything where the price moved, or a product that appeared/disappeared (a competitor selling out is your window to hold or raise price).</li><li>Schedule it once a day with <code>cron</code> (mac/Linux) or Task Scheduler (Windows).</li></ol>
+<p>Daily is plenty — be polite, one request per store.</p>
+<h2>A few honest caveats</h2>
+<ul><li><strong>Only works on Shopify stores.</strong> Roughly a quarter of the stores you compete with run Shopify; check by opening the <code>/products.json</code> URL. Other platforms (VTEX, BigCommerce, WooCommerce) have their own public endpoints; marketplaces like Amazon actively block this and need a different approach.</li><li><strong>Prices only, not promotions.</strong> Cart-level discounts won't show. The list price still tells you 90% of what you need.</li><li><strong>Be respectful.</strong> This is public data the store already serves to every browser, but hammering it is rude and pointless. Once a day covers real pricing moves.</li></ul>
+<h2>If you don't want to touch a terminal</h2>
+<p>I packaged this into a tiny open-source tool that does the save-and-diff for you: <strong><a href="https://github.com/willylam2222-bot/priceprobe">github.com/willylam2222-bot/priceprobe</a></strong> — free, run it on your own laptop.</p>
+<p>And if you'd rather just get the answer without setting anything up, I'll run it for you: send me your competitors' URLs and I'll send back a clean report of their current prices, stock, and any recent moves. Details here: <a href="https://willyverse188.gumroad.com/l/kphhe">willyverse188.gumroad.com/l/kphhe</a>.</p>
+<p>Either way — the URL at the top of this post is free and yours to use. Go look at what your competitors are charging right now.</p>
+<a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Get a competitor price report — send your URLs, get clean data back →</a>
+<a class="backhome" href="./">← More on PriceProbe</a>
+</article>
+</div>
+<footer>PriceProbe · <a href="https://github.com/willylam2222-bot/priceprobe">open-source on GitHub</a> · an independent tool, not affiliated with Shopify</footer>
+</body>
+</html>

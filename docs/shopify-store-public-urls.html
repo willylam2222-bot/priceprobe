@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Every Shopify store exposes these 4 public URLs — here's what a competitor sees in 30 seconds · PriceProbe</title>
+<meta name="description" content="Most Shopify merchants assume their catalog, pricing logic, and store structure are only visible through their storefront. They're not. Shopify serves seve">
+<meta name="keywords" content="ecommerce,  shopify,  webscraping,  python">
+<meta property="og:title" content="Every Shopify store exposes these 4 public URLs — here's what a competitor sees in 30 seconds">
+<meta property="og:description" content="Most Shopify merchants assume their catalog, pricing logic, and store structure are only visible through their storefront. They're not. Shopify serves seve">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://willylam2222-bot.github.io/priceprobe/shopify-store-public-urls.html">
+<style>
+  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--accent2:#4338ca;--bg:#f8fafc}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent)}
+  nav{border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1000px}
+  .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+  .logo span{color:var(--accent)}
+  article{padding:52px 0 20px}
+  article h1{font-size:36px;line-height:1.15;letter-spacing:-.02em;margin-bottom:22px}
+  article h2{font-size:25px;margin:38px 0 12px;letter-spacing:-.01em}
+  article h3{font-size:19px;margin:28px 0 10px}
+  article p{margin:0 0 16px;font-size:17px}
+  article ul,article ol{margin:0 0 16px 24px}
+  article li{margin-bottom:7px;font-size:17px}
+  article code{background:#f1f5f9;padding:2px 6px;border-radius:5px;font-size:14px}
+  article pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:12px;overflow-x:auto;margin:0 0 18px}
+  article pre code{background:none;padding:0;color:inherit;font-size:13.5px;line-height:1.6}
+  article table{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:15px}
+  article th,article td{border:1px solid var(--line);padding:8px 12px;text-align:left}
+  article th{background:var(--bg)}
+  article blockquote{border-left:3px solid var(--accent);padding:4px 18px;color:var(--muted);margin:0 0 18px}
+  .cta{display:block;background:var(--accent);color:#fff;text-decoration:none;text-align:center;font-weight:600;padding:15px;border-radius:10px;margin:30px 0;font-size:16px}
+  .backhome{display:inline-block;margin:8px 0 40px;color:var(--muted);font-size:14px;text-decoration:none}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="logo" href="./">Price<span>Probe</span></a><a href="https://willyverse188.gumroad.com/l/kphhe" style="font-size:14px;font-weight:600">Get a report →</a></div></nav>
+<div class="wrap">
+<article>
+<p>Most Shopify merchants assume their catalog, pricing logic, and store structure are only visible through their storefront. They're not. Shopify serves several JSON and XML endpoints publicly *by design* — the same data its own theme uses — and anyone can read them without a login, an API key, or a scraping tool.</p>
+<p>This isn't a hack or a vulnerability. It's public, intentional, and useful (it's how apps and themes work). But most store owners have never looked at what it reveals. Here are the four endpoints, what each one shows, and how to check your own store in 30 seconds.</p>
+<h2>1. <code>/products.json</code> — your entire catalog and live prices</h2>
+<pre><code>https://any-store.com/products.json?limit=250</code></pre>
+<p>Returns every product, every variant, every price, in clean JSON. Titles, options, inventory-ish signals, images, and the exact price a competitor would need to undercut you. Paginate with <code>?page=2</code> and you get the whole catalog, however big.</p>
+<p>I covered the pricing angle in detail <a href="https://dev.to/willylam2222/i-pulled-800-competitor-prices-from-4-shopify-stores-in-8-seconds-with-20-lines-of-python-no-2kfi">in a previous post</a> — the short version: a competitor can snapshot your full price list in seconds and diff it daily.</p>
+<h2>2. <code>/collections.json</code> — how you merchandise</h2>
+<pre><code>https://any-store.com/collections.json</code></pre>
+<p>Every collection you've built: "Best Sellers," "Sale," "New Arrivals," seasonal drops. This is your merchandising strategy laid out — which products you group, what you're pushing, how you segment. A competitor learns what you *think* sells, not just what you stock.</p>
+<h2>3. <code>/meta.json</code> — your store's identity</h2>
+<pre><code>https://any-store.com/meta.json</code></pre>
+<p>Returns the store's name, ID, and location fields (city, province, country). Usually harmless — it's business info that's often on your contact page anyway — but worth knowing it's queryable programmatically, which is how tools bucket and geo-tag stores at scale.</p>
+<h2>4. <code>/sitemap.xml</code> — every URL, including things you forgot were live</h2>
+<pre><code>https://any-store.com/sitemap.xml</code></pre>
+<p>Shopify auto-generates a sitemap of every product, collection, and page. It's meant for Google, but it's also a complete map of your store for anyone. Occasionally it surfaces pages a merchant assumed were "hidden" (unlinked but still published). If it's not truly unpublished, it's in here.</p>
+<h2>Check your own store right now</h2>
+<p>Open each URL with your own domain. Whatever you see is exactly what every competitor, analyst, and bot can see too. That's the point — these power legitimate integrations — but you should know what's on the table.</p>
+<p>If you want to see it programmatically, this reads all four with no dependencies:</p>
+<pre><code class="language-python">import json, ssl, urllib.request, urllib.error
+
+def get(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    for ctx in (ssl.create_default_context(), ssl._create_unverified_context()):
+        try:
+            return urllib.request.urlopen(req, timeout=25, context=ctx).read().decode("utf-8", "replace")
+        except urllib.error.URLError:
+            continue
+
+store = "https://onyxcoffeelab.com"   # &lt;- put any Shopify store here
+for path in ["/products.json?limit=1", "/collections.json", "/meta.json", "/sitemap.xml"]:
+    body = get(store + path)
+    print(path, "-&gt;", len(body), "bytes")</code></pre>
+<h2>What to actually do with this</h2>
+<p><strong>If you sell:</strong> you can't wall these off (Shopify serves them), so the play isn't hiding — it's *watching*. Since your competitors' data is equally open, monitor it. Know when a rival drops a price or sells out, because that's your window to react.</p>
+<p><strong>If you're technical:</strong> the free, open-source version that snapshots and diffs a competitor over time is here — <a href="https://github.com/willylam2222-bot/priceprobe">github.com/willylam2222-bot/priceprobe</a>.</p>
+<p><strong>If you'd rather not touch code:</strong> send me a few competitor URLs and I'll send back a clean report of their current prices, stock, and recent moves — <a href="https://willyverse188.gumroad.com/l/kphhe">willyverse188.gumroad.com/l/kphhe</a>.</p>
+<p>The data is already public on both sides. The only question is who's actually looking.</p>
+<a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Get a competitor price report — send your URLs, get clean data back →</a>
+<a class="backhome" href="./">← More on PriceProbe</a>
+</article>
+</div>
+<footer>PriceProbe · <a href="https://github.com/willylam2222-bot/priceprobe">open-source on GitHub</a> · an independent tool, not affiliated with Shopify</footer>
+</body>
+</html>
