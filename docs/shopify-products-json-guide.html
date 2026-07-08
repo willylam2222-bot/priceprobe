@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Shopify products.json endpoint — a complete, practical guide (2026) · PriceProbe</title>
+<meta name="description" content="Every Shopify store publishes a JSON feed of its catalog at /products.json. It needs no API key, no app, and no authentication — it's the same data the sto">
+<meta name="keywords" content="shopify,  webscraping,  ecommerce,  api">
+<meta property="og:title" content="The Shopify products.json endpoint — a complete, practical guide (2026)">
+<meta property="og:description" content="Every Shopify store publishes a JSON feed of its catalog at /products.json. It needs no API key, no app, and no authentication — it's the same data the sto">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://willylam2222-bot.github.io/priceprobe/shopify-products-json-guide.html">
+<style>
+  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--accent2:#4338ca;--bg:#f8fafc}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent)}
+  nav{border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1000px}
+  .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+  .logo span{color:var(--accent)}
+  article{padding:52px 0 20px}
+  article h1{font-size:36px;line-height:1.15;letter-spacing:-.02em;margin-bottom:22px}
+  article h2{font-size:25px;margin:38px 0 12px;letter-spacing:-.01em}
+  article h3{font-size:19px;margin:28px 0 10px}
+  article p{margin:0 0 16px;font-size:17px}
+  article ul,article ol{margin:0 0 16px 24px}
+  article li{margin-bottom:7px;font-size:17px}
+  article code{background:#f1f5f9;padding:2px 6px;border-radius:5px;font-size:14px}
+  article pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:12px;overflow-x:auto;margin:0 0 18px}
+  article pre code{background:none;padding:0;color:inherit;font-size:13.5px;line-height:1.6}
+  article table{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:15px}
+  article th,article td{border:1px solid var(--line);padding:8px 12px;text-align:left}
+  article th{background:var(--bg)}
+  article blockquote{border-left:3px solid var(--accent);padding:4px 18px;color:var(--muted);margin:0 0 18px}
+  .cta{display:block;background:var(--accent);color:#fff;text-decoration:none;text-align:center;font-weight:600;padding:15px;border-radius:10px;margin:30px 0;font-size:16px}
+  .backhome{display:inline-block;margin:8px 0 40px;color:var(--muted);font-size:14px;text-decoration:none}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="logo" href="./">Price<span>Probe</span></a><a href="https://willyverse188.gumroad.com/l/kphhe" style="font-size:14px;font-weight:600">Get a report →</a></div></nav>
+<div class="wrap">
+<article>
+<p>Every Shopify store publishes a JSON feed of its catalog at <code>/products.json</code>. It needs no API key, no app, and no authentication — it's the same data the storefront theme reads. This is the single most useful endpoint for anyone doing price monitoring, catalog analysis, or competitor research on Shopify, and it's badly under-documented. Here's everything it actually returns and how to use it.</p>
+<h2>The URL</h2>
+<pre><code>https://any-store.com/products.json</code></pre>
+<p>By default it returns the first 30 products. Two query params matter:</p>
+<ul><li><code>?limit=250</code> — the maximum page size (250 is the hard cap; asking for more still gives 250).</li><li><code>?page=2</code> — paginate. Keep incrementing until you get an empty <code>products</code> array.</li></ul>
+<p>So the full catalog of a large store is just a loop:</p>
+<pre><code class="language-python">import json, ssl, time, urllib.request, urllib.error
+
+def fetch(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    for ctx in (ssl.create_default_context(), ssl._create_unverified_context()):
+        try:
+            return urllib.request.urlopen(req, timeout=25, context=ctx).read()
+        except urllib.error.URLError:
+            continue
+    raise RuntimeError("fetch failed: " + url)   # fail loudly, don't return None
+
+def all_products(base):
+    page, out = 1, []
+    while True:
+        data = json.loads(fetch(f"{base}/products.json?limit=250&amp;page={page}"))
+        batch = data.get("products", [])
+        if not batch:
+            break
+        out += batch
+        page += 1
+        time.sleep(0.5)                            # be polite between pages
+    return out
+
+products = all_products("https://onyxcoffeelab.com")
+print(len(products), "products")</code></pre>
+<h2>What each product contains</h2>
+<p>A product object has these fields:</p>
+<table><thead><tr><th>Field</th><th>What it's for</th></tr></thead><tbody><tr><td><code>id</code></td><td>Stable Shopify product ID</td></tr><tr><td><code>title</code></td><td>Product name</td></tr><tr><td><code>handle</code></td><td>URL slug (<code>/products/&lt;handle&gt;</code>)</td></tr><tr><td><code>vendor</code></td><td>Brand</td></tr><tr><td><code>product_type</code></td><td>Category</td></tr><tr><td><code>tags</code></td><td>Merchandising tags</td></tr><tr><td><code>body_html</code></td><td>Full description (HTML)</td></tr><tr><td><code>published_at</code> / <code>updated_at</code></td><td>When it went live / last changed</td></tr><tr><td><code>variants</code></td><td>The array that actually holds prices</td></tr><tr><td><code>images</code></td><td>Image URLs</td></tr><tr><td><code>options</code></td><td>Variant option names (Size, Grind, etc.)</td></tr></tbody></table>
+<h2>The variant fields (where the money is)</h2>
+<p>Prices live on <strong>variants</strong>, not the product. Each variant gives you:</p>
+<table><thead><tr><th>Field</th><th>Why it matters</th></tr></thead><tbody><tr><td><code>price</code></td><td>The current selling price (string, e.g. <code>"26.00"</code>)</td></tr><tr><td><code>compare_at_price</code></td><td>The "was" price — <strong>if this is set and higher than <code>price</code>, the item is on sale</strong>. This is how you detect promotions.</td></tr><tr><td><code>available</code></td><td>Boolean in/out of stock. (Note: it's a boolean, not a quantity.)</td></tr><tr><td><code>sku</code></td><td>The store's SKU — useful for matching the same product across stores</td></tr><tr><td><code>grams</code></td><td>Shipping weight</td></tr><tr><td><code>option1/2/3</code></td><td>The variant values (e.g. "12oz", "Whole Bean")</td></tr><tr><td><code>updated_at</code></td><td>Timestamp — diff this between runs to catch changes cheaply</td></tr></tbody></table>
+<h2>Three things you can build in an afternoon</h2>
+<ol><li><strong>Price monitor</strong> — save <code>{sku: price}</code> each run, diff against last run, alert on changes.</li><li><strong>Sale detector</strong> — flag any variant where <code>compare_at_price &gt; price</code>. You now know exactly what a competitor is discounting and by how much.</li><li><strong>Stock watch</strong> — track <code>available</code> flipping to <code>false</code>; a competitor selling out is your window to hold or raise price.</li></ol>
+<h2>Honest limits</h2>
+<ul><li><strong>Published products only.</strong> Drafts and unpublished items don't appear.</li><li><strong><code>available</code> is a boolean, not a count.</strong> You can't see *how many* are left, just in/out of stock.</li><li><strong>Prices, not cart discounts.</strong> Automatic cart-level or code-based discounts won't show — but <code>compare_at_price</code> covers standard sale pricing.</li><li><strong>Not every store is Shopify.</strong> Check by opening the URL; if you get JSON, it's Shopify. Other platforms (VTEX, BigCommerce) have their own public endpoints.</li><li><strong>Be polite.</strong> This is public data, but hammering it is pointless — once a day catches real pricing moves.</li></ul>
+<h2>Turn it into something you'll actually use</h2>
+<p>The open-source tool that does the save-and-diff (price + sale + stock) for you is here: <a href="https://github.com/willylam2222-bot/priceprobe">github.com/willylam2222-bot/priceprobe</a>. If you'd rather just get the answer, send me a few competitor URLs and I'll return a clean report of their prices, sales, and stock: <a href="https://willyverse188.gumroad.com/l/kphhe">willyverse188.gumroad.com/l/kphhe</a>.</p>
+<p>The endpoint is public and free. Now you know exactly what's in it.</p>
+<a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Get a competitor price report — send your URLs, get clean data back →</a>
+<a class="backhome" href="./">← More on PriceProbe</a>
+</article>
+</div>
+<footer>PriceProbe · <a href="https://github.com/willylam2222-bot/priceprobe">open-source on GitHub</a> · an independent tool, not affiliated with Shopify</footer>
+</body>
+</html>
