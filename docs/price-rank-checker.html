@@ -83,6 +83,10 @@
     </div>
     <div class="ends"><span id="lowend"></span><span>median <b id="medend"></b></span><span id="highend"></span></div>
     <div class="insight" id="insight"></div>
+    <div class="share" id="share" style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px">
+      <button onclick="copyShare()" style="flex:1;min-width:150px;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;cursor:pointer" id="copybtn">📋 Copy my result to share</button>
+      <a id="tweet" href="#" target="_blank" rel="noopener" style="flex:1;min-width:150px;text-align:center;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;text-decoration:none">𝕏 Post my rank</a>
+    </div>
     <a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Now watch where your *competitors* price — get a live report, $49 →</a>
     <p class="foot-note">Want the full breakdown for your category? See the <a href="dtc-pricing-index-2026.html">2026 DTC Pricing Index</a>.</p>
   </div>
@@ -131,8 +135,21 @@ function rank(){
   document.getElementById('medend').textContent=money(median);
   document.getElementById('highend').textContent="priciest "+money(d.pts[d.pts.length-1][1]);
   document.getElementById('insight').innerHTML="<b>What this means:</b> "+tone;
+  // shareable result
+  const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce"}[cat];
+  const url="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html";
+  window._shareText=`My ${catName} is priced higher than ~${pct}% of the market (${money(price)}). Where does yours rank? Free tool: ${url}`;
+  document.getElementById('tweet').href="https://twitter.com/intent/tweet?text="+encodeURIComponent(window._shareText);
+  document.getElementById('copybtn').textContent="📋 Copy my result to share";
   document.getElementById('result').style.display='block';
   document.getElementById('result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function copyShare(){
+  const t=window._shareText||"";
+  navigator.clipboard.writeText(t).then(()=>{
+    document.getElementById('copybtn').textContent="✓ Copied!";
+    setTimeout(()=>{document.getElementById('copybtn').textContent="📋 Copy my result to share";},2000);
+  }).catch(()=>{ prompt("Copy your result:", t); });
 }
 document.getElementById('price').addEventListener('keydown',e=>{ if(e.key==='Enter') rank(); });
 </script>
