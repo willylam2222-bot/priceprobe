@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Where Does Your Price Rank? — free DTC pricing checker</title>
+<meta name="description" content="Free tool: enter your product price and see exactly where it ranks against the market — powered by live pricing data from coffee, tea, supplement and hot sauce sellers. Are you the value pick or the premium one?">
+<meta name="keywords" content="pricing calculator, where does my price rank, coffee price checker, product pricing benchmark, am I priced too high">
+<meta property="og:title" content="Where Does Your Price Rank?">
+<meta property="og:description" content="Enter your price, see your percentile vs the market. Free tool, real DTC pricing data.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html">
+<style>
+ :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--accent2:#4338ca;--bg:#f8fafc;--green:#067647}
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.6;background:#fff}
+ .wrap{max-width:640px;margin:0 auto;padding:0 24px}
+ a{color:var(--accent)}
+ nav{border-bottom:1px solid var(--line)}
+ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1000px}
+ .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+ .logo span{color:var(--accent)}
+ header{text-align:center;padding:46px 0 8px}
+ .tag{display:inline-block;background:#eef2ff;color:var(--accent2);font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;margin-bottom:16px}
+ h1{font-size:34px;line-height:1.14;letter-spacing:-.02em;margin-bottom:12px}
+ .sub{font-size:18px;color:var(--muted);margin-bottom:26px}
+ .tool{border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 10px 40px -22px rgba(15,23,42,.35)}
+ label{display:block;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:0 0 7px}
+ .row{display:flex;gap:14px;flex-wrap:wrap}
+ .row>div{flex:1;min-width:180px}
+ select,input{width:100%;font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+ select:focus,input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+ button.go{width:100%;margin-top:18px;background:var(--accent);color:#fff;border:none;font-size:17px;font-weight:600;padding:14px;border-radius:10px;cursor:pointer;transition:background .15s}
+ button.go:hover{background:var(--accent2)}
+ #result{display:none;margin-top:24px}
+ .verdict{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+ .pctline{color:var(--muted);font-size:16px;margin-bottom:20px}
+ .scale{position:relative;height:52px;margin:26px 0 8px}
+ .track{position:absolute;top:22px;left:0;right:0;height:8px;border-radius:5px;background:linear-gradient(90deg,#dbeafe,#4f46e5)}
+ .mark{position:absolute;top:8px;transform:translateX(-50%);text-align:center;transition:left .5s ease}
+ .mark .dot{width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid #fff;box-shadow:0 0 0 2px var(--ink);margin:0 auto}
+ .mark .lbl{font-size:12px;font-weight:700;margin-top:6px;white-space:nowrap}
+ .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+ .insight{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:15px;margin:18px 0}
+ .cta{display:block;background:var(--accent);color:#fff;text-decoration:none;text-align:center;font-weight:600;padding:15px;border-radius:10px;margin-top:8px;font-size:16px}
+ .foot-note{color:var(--muted);font-size:13px;text-align:center;margin-top:22px}
+ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:13px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="logo" href="./">Price<span>Probe</span></a><a href="dtc-pricing-index-2026.html" style="font-size:14px;font-weight:600">The data →</a></div></nav>
+<div class="wrap">
+<header>
+  <span class="tag">FREE TOOL</span>
+  <h1>Where does your price rank?</h1>
+  <p class="sub">Enter your product's price and see exactly where it sits against the real market — value pick, premium, or lost in the crowded middle.</p>
+</header>
+
+<div class="tool">
+  <div class="row">
+    <div>
+      <label for="cat">Category</label>
+      <select id="cat">
+        <option value="coffee">☕ Specialty coffee (12oz bag)</option>
+        <option value="tea">🍵 Loose-leaf tea (package)</option>
+        <option value="supplements">💊 Supplements (product)</option>
+        <option value="hotsauce">🌶 Hot sauce (bottle)</option>
+      </select>
+    </div>
+    <div>
+      <label for="price">Your price (USD)</label>
+      <input id="price" type="number" min="0" step="0.01" placeholder="e.g. 24.00" inputmode="decimal">
+    </div>
+  </div>
+  <button class="go" onclick="rank()">See where I rank →</button>
+
+  <div id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="pctline" id="pctline"></div>
+    <div class="scale">
+      <div class="track"></div>
+      <div class="mark" id="mark" style="left:50%"><div class="dot"></div><div class="lbl" id="marklbl"></div></div>
+    </div>
+    <div class="ends"><span id="lowend"></span><span>median <b id="medend"></b></span><span id="highend"></span></div>
+    <div class="insight" id="insight"></div>
+    <a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Now watch where your *competitors* price — get a live report, $49 →</a>
+    <p class="foot-note">Want the full breakdown for your category? See the <a href="dtc-pricing-index-2026.html">2026 DTC Pricing Index</a>.</p>
+  </div>
+</div>
+
+<p class="foot-note" style="margin-top:26px">Based on thousands of live prices pulled from real store catalogs (July 2026). Your input isn't stored or sent anywhere — the math runs in your browser.</p>
+</div>
+<footer>PriceProbe · a free tool from the makers of the <a href="dtc-pricing-index-2026.html">DTC Pricing Index</a> · independent, not affiliated with Shopify</footer>
+
+<script>
+// Real percentile data (price at each percentile), from live scrapes — see the index reports.
+const DATA = {
+  coffee:      {unit:"12oz bag", pts:[[0,7],[10,13.50],[25,18],[50,26],[75,32],[90,38.50],[100,45]]},
+  tea:         {unit:"package",  pts:[[0,5],[10,8.95],[25,12],[50,20],[75,30.25],[90,37.99],[100,48]]},
+  supplements: {unit:"product",  pts:[[0,10],[10,27.13],[25,35.99],[50,49.99],[75,59.99],[90,75],[100,95]]},
+  hotsauce:    {unit:"bottle",   pts:[[0,3],[10,5.99],[25,7],[50,12],[75,23],[90,25],[100,30]]},
+};
+function pctFor(price, pts){
+  if(price<=pts[0][1]) return 1;
+  if(price>=pts[pts.length-1][1]) return 99;
+  for(let i=1;i<pts.length;i++){
+    const [p0,v0]=pts[i-1], [p1,v1]=pts[i];
+    if(price<=v1){ return Math.round(p0 + (p1-p0)*(price-v0)/(v1-v0)); }
+  }
+  return 50;
+}
+function money(n){ return "$"+n.toFixed(2); }
+function rank(){
+  const cat=document.getElementById('cat').value;
+  const price=parseFloat(document.getElementById('price').value);
+  if(!(price>0)){ document.getElementById('price').focus(); return; }
+  const d=DATA[cat];
+  const pct=pctFor(price,d.pts);
+  const median=d.pts.find(p=>p[0]===50)[1];
+  const higherThan=pct;              // priced higher than pct% of the market
+  let verdict, tone;
+  if(pct<=25){ verdict="You're the value pick 💪"; tone="You undercut most of the market — great for winning price-sensitive buyers, as long as the margin still works."; }
+  else if(pct<=60){ verdict="You're mid-market 😐"; tone="You're priced right in the crowded middle — close to the median, where it's hardest to stand out on price alone."; }
+  else if(pct<=85){ verdict="You're premium 💎"; tone="You sit above most competitors. That holds only if your story, quality or brand clearly justifies the gap — and it moves when rivals discount."; }
+  else { verdict="You're top-of-market 🔝"; tone="You're among the most expensive in the category. High risk if a competitor quietly matches your quality at a lower price and you don't notice."; }
+  document.getElementById('verdict').textContent=verdict;
+  document.getElementById('pctline').innerHTML=`Your <b>${money(price)}</b> ${d.unit} is priced higher than <b>~${higherThan}%</b> of the market.`;
+  document.getElementById('mark').style.left=Math.max(4,Math.min(96,pct))+"%";
+  document.getElementById('marklbl').textContent="you · "+money(price);
+  document.getElementById('lowend').textContent="cheapest "+money(d.pts[0][1]);
+  document.getElementById('medend').textContent=money(median);
+  document.getElementById('highend').textContent="priciest "+money(d.pts[d.pts.length-1][1]);
+  document.getElementById('insight').innerHTML="<b>What this means:</b> "+tone;
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+document.getElementById('price').addEventListener('keydown',e=>{ if(e.key==='Enter') rank(); });
+</script>
+</body>
+</html>
