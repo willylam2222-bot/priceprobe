@@ -64,6 +64,9 @@
         <option value="coffee">☕ Specialty coffee (12oz bag)</option>
         <option value="tea">🍵 Loose-leaf tea (package)</option>
         <option value="supplements">💊 Supplements (product)</option>
+        <option value="skincare">🧴 Skincare (product)</option>
+        <option value="candles">🕯️ Candles (each)</option>
+        <option value="pettreats">🐕 Dog/pet treats (pack)</option>
         <option value="hotsauce">🌶 Hot sauce (bottle)</option>
       </select>
     </div>
@@ -103,6 +106,9 @@ const DATA = {
   tea:         {unit:"package",  pts:[[0,5],[10,8.95],[25,12],[50,20],[75,30.25],[90,37.99],[100,48]]},
   supplements: {unit:"product",  pts:[[0,10],[10,27.13],[25,35.99],[50,49.99],[75,59.99],[90,75],[100,95]]},
   hotsauce:    {unit:"bottle",   pts:[[0,3],[10,5.99],[25,7],[50,12],[75,23],[90,25],[100,30]]},
+  skincare:    {unit:"product",  pts:[[0,8],[10,11.99],[25,14.99],[50,19.99],[75,27.99],[90,42],[100,60]]},
+  candles:     {unit:"candle",   pts:[[0,7],[10,10],[25,13.99],[50,18],[75,25],[90,26],[100,42]]},
+  pettreats:   {unit:"pack",     pts:[[0,3.50],[10,4.98],[25,7.09],[50,11.98],[75,14.99],[90,20.24],[100,26]]},
 };
 function pctFor(price, pts){
   if(price<=pts[0][1]) return 1;
@@ -136,7 +142,7 @@ function rank(){
   document.getElementById('highend').textContent="priciest "+money(d.pts[d.pts.length-1][1]);
   document.getElementById('insight').innerHTML="<b>What this means:</b> "+tone;
   // shareable result
-  const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce"}[cat];
+  const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce",skincare:"skincare",candles:"candle",pettreats:"pet treat"}[cat];
   const url="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html";
   window._shareText=`My ${catName} is priced higher than ~${pct}% of the market (${money(price)}). Where does yours rank? Free tool: ${url}`;
   document.getElementById('tweet').href="https://twitter.com/intent/tweet?text="+encodeURIComponent(window._shareText);
