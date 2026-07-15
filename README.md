@@ -34,6 +34,8 @@ track a few competitors, that's overkill. PriceProbe is a tiny script you own an
 - Extracts **price**, **title**, and **stock status** with robust regexes
 - Diffs against the last run → flags **▲ price up / ▼ price down / ✕ out-of-stock / ✓ restock**
 - Renders a clean, shareable **HTML report**
+- **Pings you the moment something moves** — `notify.py` posts changes straight to Slack or Discord (any JSON webhook), so you never have to open the report
+- **Runs itself, free** — a ready GitHub Actions workflow watches on a daily schedule with zero servers
 
 ## Quick start
 
@@ -58,26 +60,35 @@ No `pip install`. No config files. Runs anywhere Python 3.8+ runs.
 
 → produces a report highlighting exactly what changed since yesterday.
 
-## Automate it
+## Automate it + get alerted (free, no server)
 
-Schedule `python3 monitor.py` with cron (Mac/Linux) or Task Scheduler (Windows) to get a fresh
-report every morning. Never miss a competitor's price move again.
+Fork this repo, drop your competitors into `targets.json`, and the included
+[GitHub Actions workflow](.github/workflows/monitor.yml) runs the whole thing **daily on GitHub's
+runners — free**. It:
 
-**No server? Run it free on GitHub.** This repo ships a [GitHub Actions workflow](.github/workflows/monitor.yml)
-that runs the tracker on a daily schedule and uploads the report as an artifact — fork it, drop in your
-`targets.json`, and you get free scheduled monitoring with zero infrastructure.
+1. checks every competitor URL,
+2. commits the snapshot back (so day-to-day diffs actually work), and
+3. runs `notify.py` to **ping your Slack/Discord** on any change.
+
+Add one repo secret (`PRICEPROBE_WEBHOOK` = your Slack or Discord webhook) and you have a
+hands-off competitor-price watchdog. No cron box, no server, no subscription.
+
+```bash
+python3 monitor.py && python3 notify.py   # run the pair locally, or let Actions do it
+```
 
 ---
 
-## 🚀 Don't want to touch the terminal?
+## 🚀 Want it done *for* you?
 
-This free version is for developers comfortable running a script. If you're a **store owner** who
-just wants it to *work* — a one-time **$19** packaged version includes a double-click runner, a
-step-by-step guide with screenshots, and email support:
+The free version above is everything a developer needs. But if you'd rather not fork, configure, and
+babysit a workflow — **I'll run it for you.** Send your competitor URLs + where to ping you
+(Slack, Discord, or email) and I watch them daily and alert you the moment a price or stock status
+moves. No setup on your end.
 
-**→ [Get PriceProbe (one-time $19, no subscription)](https://willyverse188.gumroad.com/l/ptzxo)**
+**→ [Managed monitoring + alerts — see plans](https://willyverse188.gumroad.com/l/kphhe)**
 
-Same engine. You're paying for zero-setup convenience, not a monthly rental.
+You're paying for "never think about it again," not a rental you have to operate.
 
 ---
 

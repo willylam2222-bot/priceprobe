@@ -1,16 +1,20 @@
-name: Competitor price check
+name: Competitor price watch
 
-# Run PriceProbe on a schedule, for free, on GitHub's runners — no server needed.
-# Fork this repo, add your competitor URLs to targets.json, and you get a fresh
-# report as a downloadable artifact every day.
+# Runs PriceProbe on a schedule, for free, on GitHub's runners — no server needed.
+# Fork this repo, add your competitor URLs to targets.json, and (optionally) set a
+# PRICEPROBE_WEBHOOK secret (Slack/Discord). You get pinged the moment a price or
+# stock status changes. Snapshots are committed back so day-to-day diffs work.
 
 on:
   schedule:
     - cron: "0 8 * * *"   # daily at 08:00 UTC — adjust to your timezone
   workflow_dispatch: {}    # ...or run it manually from the Actions tab
 
+permissions:
+  contents: write          # needed to commit snapshots back
+
 jobs:
-  monitor:
+  watch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,11 +25,23 @@ jobs:
 
       - name: Run PriceProbe
         run: |
-          # Uses your targets.json if present, otherwise the bundled example.
           [ -f targets.json ] || cp targets.example.json targets.json
           python3 monitor.py
 
-      - name: Upload the report
+      - name: Alert on any change (Slack / Discord)
+        env:
+          PRICEPROBE_WEBHOOK: ${{ secrets.PRICEPROBE_WEBHOOK }}
+        run: python3 notify.py
+
+      - name: Persist snapshots (so tomorrow's run can diff against today)
+        run: |
+          git config user.name  "priceprobe-bot"
+          git config user.email "priceprobe-bot@users.noreply.github.com"
+          git add snapshots/ report.html 2>/dev/null || true
+          git commit -m "price snapshot $(date -u +%Y-%m-%d)" || echo "no changes to commit"
+          git push || echo "nothing to push"
+
+      - name: Upload the report as an artifact too
         uses: actions/upload-artifact@v4
         with:
           name: price-report
