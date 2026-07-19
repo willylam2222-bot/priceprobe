@@ -67,6 +67,8 @@
         <option value="skincare">🧴 Skincare (product)</option>
         <option value="candles">🕯️ Candles (each)</option>
         <option value="pettreats">🐕 Dog/pet treats (pack)</option>
+        <option value="makeup">💄 Makeup / cosmetics (product)</option>
+        <option value="bathbody">🧼 Bath &amp; body / soap (product)</option>
         <option value="hotsauce">🌶 Hot sauce (bottle)</option>
       </select>
     </div>
@@ -110,9 +112,11 @@ const DATA = {
   skincare:    {unit:"product",  pts:[[0,8],[10,10],[25,14.99],[50,22],[75,40],[90,51.99],[100,70]]},
   candles:     {unit:"candle",   pts:[[0,7],[10,9.95],[25,22],[50,29.95],[75,38],[90,48.45],[100,60]]},
   pettreats:   {unit:"pack",     pts:[[0,3.50],[10,6.99],[25,9],[50,13],[75,20],[90,29],[100,34]]},
+  makeup:      {unit:"product",  pts:[[0,10],[10,17],[25,24],[50,32],[75,40],[90,48],[100,60]]},
+  bathbody:    {unit:"product",  pts:[[0,5],[10,8],[25,12],[50,19.95],[75,28],[90,34.95],[100,40]]},
 };
 // Real named-brand medians (live scrapes, July 2026) — gives concrete context.
-const BRANDS = {"coffee":[{"name":"Red Bay","median":19.88},{"name":"Klatch","median":20.95},{"name":"Ceremony","median":25.0},{"name":"Onyx","median":26.0},{"name":"Methodical","median":26.0},{"name":"Verve","median":26.5},{"name":"Atlas","median":27.0},{"name":"Death Wish","median":29.98}],"tea":[{"name":"Smith","median":19.99},{"name":"Tea Forte","median":22.0},{"name":"Harney & Sons","median":22.99},{"name":"Teapigs","median":24.99},{"name":"Rishi","median":25.5},{"name":"Art of Tea","median":27.0},{"name":"Firebelly","median":28.95}],"supplements":[{"name":"Bulk Supplements","median":25.97},{"name":"Kaged","median":29.0},{"name":"Jacked Factory","median":29.99},{"name":"NutraBio","median":34.99},{"name":"Naked Nutrition","median":35.99},{"name":"Momentous","median":39.95},{"name":"Transparent Labs","median":49.99}],"hotsauce":[{"name":"Heatonist","median":12.0},{"name":"Truff","median":12.3},{"name":"Bushwick Kitchen","median":14.99},{"name":"Fly By Jing","median":20.0},{"name":"Torchbearer","median":24.99}],"skincare":[{"name":"Versed","median":14.99},{"name":"Cocokind","median":18.5},{"name":"Baxter","median":26.0},{"name":"Krave Beauty","median":27.0},{"name":"Necessaire","median":40.0}],"candles":[{"name":"P.F. Candle Co","median":24.0},{"name":"Voluspa","median":26.0},{"name":"Homesick","median":29.95},{"name":"Boy Smells","median":31.0},{"name":"Brooklyn Candle","median":34.0},{"name":"Keap","median":54.5}],"pettreats":[]};
+const BRANDS = {"coffee":[{"name":"Red Bay","median":19.88},{"name":"Klatch","median":20.95},{"name":"Ceremony","median":25.0},{"name":"Onyx","median":26.0},{"name":"Methodical","median":26.0},{"name":"Verve","median":26.5},{"name":"Atlas","median":27.0},{"name":"Death Wish","median":29.98}],"tea":[{"name":"Smith","median":19.99},{"name":"Tea Forte","median":22.0},{"name":"Harney & Sons","median":22.99},{"name":"Teapigs","median":24.99},{"name":"Rishi","median":25.5},{"name":"Art of Tea","median":27.0},{"name":"Firebelly","median":28.95}],"supplements":[{"name":"Bulk Supplements","median":25.97},{"name":"Kaged","median":29.0},{"name":"Jacked Factory","median":29.99},{"name":"NutraBio","median":34.99},{"name":"Naked Nutrition","median":35.99},{"name":"Momentous","median":39.95},{"name":"Transparent Labs","median":49.99}],"hotsauce":[{"name":"Heatonist","median":12.0},{"name":"Truff","median":12.3},{"name":"Bushwick Kitchen","median":14.99},{"name":"Fly By Jing","median":20.0},{"name":"Torchbearer","median":24.99}],"skincare":[{"name":"Versed","median":14.99},{"name":"Cocokind","median":18.5},{"name":"Baxter","median":26.0},{"name":"Krave Beauty","median":27.0},{"name":"Necessaire","median":40.0}],"candles":[{"name":"P.F. Candle Co","median":24.0},{"name":"Voluspa","median":26.0},{"name":"Homesick","median":29.95},{"name":"Boy Smells","median":31.0},{"name":"Brooklyn Candle","median":34.0},{"name":"Keap","median":54.5}],"pettreats":[],"makeup":[{"name":"Tower 28","median":22.0},{"name":"The Lip Bar","median":23.0},{"name":"100% Pure","median":28.0},{"name":"Kosas","median":29.0},{"name":"Saie","median":30.0},{"name":"Merit","median":30.0},{"name":"Jones Road","median":32.0},{"name":"RMS Beauty","median":36.0},{"name":"Ilia","median":40.0}],"bathbody":[{"name":"Duke Cannon","median":11.0},{"name":"Dr. Squatch","median":14.0},{"name":"Public Goods","median":19.95},{"name":"Osea","median":20.0},{"name":"Ursa Major","median":22.0},{"name":"Beekman 1802","median":22.0},{"name":"Nécessaire","median":28.0}]};
 function brandContext(cat, price){
   const list=(BRANDS[cat]||[]).slice().sort((a,b)=>a.median-b.median);
   if(list.length<3) return "";
@@ -158,7 +162,7 @@ function rank(){
   const bc=brandContext(cat, price);
   document.getElementById('insight').innerHTML="<b>What this means:</b> "+tone+(bc?"<br><br><b>Real brands for scale:</b> "+bc:"");
   // shareable result
-  const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce",skincare:"skincare",candles:"candle",pettreats:"pet treat"}[cat];
+  const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce",skincare:"skincare",candles:"candle",pettreats:"pet treat",makeup:"makeup",bathbody:"bath & body"}[cat];
   const url="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html";
   window._shareText=`My ${catName} is priced higher than ~${pct}% of the market (${money(price)}). Where does yours rank? Free tool: ${url}`;
   document.getElementById('tweet').href="https://twitter.com/intent/tweet?text="+encodeURIComponent(window._shareText);
