@@ -45,6 +45,76 @@ OOS_RE = re.compile(
 TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
 OGTITLE_RE = re.compile(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\'](.*?)["\']', re.I)
 
+# Structured data — the most reliable price/stock source. Nearly every commerce
+# platform (Shopify, WooCommerce, BigCommerce, Squarespace, custom) emits one of
+# these for SEO, so parsing them lets us track almost any store, not just Shopify.
+JSONLD_RE = re.compile(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', re.I | re.S)
+OGPRICE_RE = re.compile(r'<meta[^>]+(?:property|name)=["\'](?:og:price:amount|product:price:amount)["\'][^>]+content=["\']([\d.,]+)["\']', re.I)
+OGCURR_RE = re.compile(r'<meta[^>]+(?:property|name)=["\'](?:og:price:currency|product:price:currency)["\'][^>]+content=["\']([A-Za-z]{3})["\']', re.I)
+CUR_SYM = {"USD": "$", "SGD": "S$", "AUD": "A$", "HKD": "HK$", "GBP": "£", "EUR": "€", "MYR": "RM", "CAD": "C$"}
+
+
+def _money(amount, currency):
+    sym = CUR_SYM.get((currency or "").upper(), ((currency or "").upper() + " ") if currency else "$")
+    try:
+        return f"{sym}{float(amount):.2f}"
+    except (TypeError, ValueError):
+        return f"{sym}{amount}"
+
+
+def _walk_jsonld(obj, out):
+    """Collect price/currency/availability from any Offer/Product nodes in a JSON-LD tree."""
+    if isinstance(obj, list):
+        for x in obj:
+            _walk_jsonld(x, out)
+        return
+    if not isinstance(obj, dict):
+        return
+    price = obj.get("price", obj.get("lowPrice"))
+    if price not in (None, ""):
+        out.append((price, obj.get("priceCurrency"), str(obj.get("availability") or "")))
+    for v in obj.values():
+        if isinstance(v, (dict, list)):
+            _walk_jsonld(v, out)
+
+
+MICRO_PRICE_RE = re.compile(r'itemprop=["\']price["\'][^>]*\scontent=["\']([\d.,]+)["\']', re.I)
+MICRO_PRICE_RE2 = re.compile(r'\scontent=["\']([\d.,]+)["\'][^>]*itemprop=["\']price["\']', re.I)
+MICRO_CUR_RE = re.compile(r'itemprop=["\']priceCurrency["\'][^>]*\scontent=["\']([A-Za-z]{3})["\']', re.I)
+MICRO_AVAIL_RE = re.compile(r'itemprop=["\']availability["\'][^>]*(?:href|content)=["\'][^"\']*?(InStock|OutOfStock|SoldOut|PreOrder|Discontinued)', re.I)
+
+
+def microdata_price_stock(htmltext):
+    """Return (price_str, in_stock|None) from schema.org microdata (itemprop=price)."""
+    m = MICRO_PRICE_RE.search(htmltext) or MICRO_PRICE_RE2.search(htmltext)
+    if not m:
+        return None, None
+    cm = MICRO_CUR_RE.search(htmltext)
+    am = MICRO_AVAIL_RE.search(htmltext)
+    in_stock = None
+    if am:
+        a = am.group(1).lower()
+        in_stock = False if a in ("outofstock", "soldout", "discontinued") else True
+    return _money(m.group(1), cm.group(1) if cm else None), in_stock
+
+
+def jsonld_price_stock(htmltext):
+    """Return (price_str, in_stock|None) from JSON-LD, or (None, None)."""
+    for block in JSONLD_RE.findall(htmltext):
+        try:
+            data = json.loads(block.strip())
+        except Exception:
+            continue
+        found = []
+        _walk_jsonld(data, found)
+        for amount, currency, avail in found:
+            a = avail.lower()
+            in_stock = False if ("outofstock" in a or "soldout" in a or "discontinued" in a) \
+                else True if ("instock" in a or "onlineonly" in a or "instoreonly" in a or "preorder" in a) \
+                else None
+            return _money(amount, currency), in_stock
+    return None, None
+
 
 def fetch(url):
     """Return decoded HTML text or raises. Polite, gzip-aware, retrying."""
@@ -93,16 +163,35 @@ def extract(htmltext, custom_regex=None):
         title = clean(m.group(1))[:140]
 
     price = None
+    # 1) explicit per-target override always wins
     if custom_regex:
         cm = re.search(custom_regex, htmltext)
         if cm:
             price = clean(cm.group(cm.lastindex or 0))
+    # 2) structured data (schema.org JSON-LD, then microdata) — most reliable, cross-platform
+    ld_price, ld_stock = jsonld_price_stock(htmltext)
+    if ld_price is None:
+        md_price, md_stock = microdata_price_stock(htmltext)
+        if md_price:
+            ld_price, ld_stock = md_price, (ld_stock if ld_stock is not None else md_stock)
+    if not price and ld_price:
+        price = ld_price
+    # 3) Open Graph / product price meta tags
     if not price:
-        pm = PRICE_RE.search(htmltext)
-        if pm:
-            price = clean(pm.group(0))
+        om = OGPRICE_RE.search(htmltext)
+        if om:
+            cm2 = OGCURR_RE.search(htmltext)
+            price = _money(om.group(1), cm2.group(1) if cm2 else None)
+    # 4) last resort: currency-looking string in the raw HTML. Prefer a plain USD "$"
+    #    match over S$/A$/RM etc., which are usually currency-switcher noise.
+    if not price:
+        matches = [clean(m) for m in PRICE_RE.findall(htmltext)]
+        if matches:
+            usd = [m for m in matches if m.startswith("$")]
+            price = usd[0] if usd else matches[0]
 
-    in_stock = not bool(OOS_RE.search(htmltext))
+    # stock: trust JSON-LD availability if present, else fall back to text heuristic
+    in_stock = ld_stock if ld_stock is not None else not bool(OOS_RE.search(htmltext))
     return {"title": title, "price": price, "in_stock": in_stock}
 
 
