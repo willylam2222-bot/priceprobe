@@ -274,7 +274,9 @@ def render(cur, changes, errors):
     chg_by_name = {}
     for c in changes:
         chg_by_name.setdefault(c["name"], []).append(c)
-    for row in cur["rows"]:
+    # changed products first — that's what the reader is paying to see
+    ordered = sorted(cur["rows"], key=lambda r: 0 if chg_by_name.get(r["name"]) else 1)
+    for row in ordered:
         cs = chg_by_name.get(row["name"], [])
         badge = ""
         for c in cs:
@@ -282,8 +284,11 @@ def render(cur, changes, errors):
             badge += f'<span style="background:{color};color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-right:6px;white-space:nowrap">{label}</span>'
         detail = "<br>".join(html.escape(c["detail"]) for c in cs)
         stock = "In stock" if row.get("in_stock") else '<b style="color:#b42318">Out of stock</b>'
+        # highlight rows that moved with a colored left border
+        edge = KIND_STYLE.get(cs[0]["kind"], ("#374151", ""))[0] if cs else "transparent"
+        rowbg = "#fffdf5" if cs else "#fff"
         rows_html += f"""
-        <tr>
+        <tr style="background:{rowbg};border-left:4px solid {edge}">
           <td><b>{html.escape(row['name'])}</b><br>
               <a href="{html.escape(row['url'])}" style="color:#6b7280;font-size:12px">{html.escape(row['url'][:60])}</a></td>
           <td style="font-size:15px">{html.escape(row.get('price') or '—')}</td>
@@ -297,7 +302,27 @@ def render(cur, changes, errors):
         err_html = f'<div style="background:#fef3f2;border:1px solid #fecdca;color:#b42318;padding:12px 16px;border-radius:10px;margin:16px 0"><b>Could not fetch:</b><ul style="margin:6px 0 0">{items}</ul></div>'
 
     n_changes = len(changes)
-    summary = f"{n_changes} change(s) detected" if n_changes else "No changes since last run"
+    by_kind = {}
+    for c in changes:
+        by_kind.setdefault(c["kind"], []).append(c)
+    order = ["price_down", "price_up", "oos", "restock", "new"]
+    if n_changes:
+        parts, items = [], ""
+        for k in order:
+            if k in by_kind:
+                color, label = KIND_STYLE[k]
+                sym, word = (label.split(" ", 1) + [""])[:2]
+                parts.append(f'<span style="color:{color};font-weight:700">{sym} {len(by_kind[k])} {word}</span>')
+                for c in by_kind[k]:
+                    items += f'<li style="margin:5px 0"><span style="color:{color};font-weight:600">{label}</span> — <b>{html.escape(c["name"])}</b>: {html.escape(c["detail"])}</li>'
+        moved_html = (f'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;'
+                      f'margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)">'
+                      f'<div style="font-size:15px;margin-bottom:10px">{" &nbsp;·&nbsp; ".join(parts)}</div>'
+                      f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#374151">{items}</ul></div>')
+        summary = f"{n_changes} change(s) since your last report"
+    else:
+        moved_html = ""
+        summary = "No changes since last run — your competitors held steady"
 
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -309,6 +334,7 @@ def render(cur, changes, errors):
     <span style="color:#6b7280;font-size:13px">Generated {ts}</span>
   </div>
   <p style="font-size:16px;margin:10px 0 0"><b>{summary}.</b> Monitoring {len(cur['rows'])} product(s).</p>
+  {moved_html}
   {err_html}
   <table style="width:100%;border-collapse:collapse;margin-top:18px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
     <thead><tr style="background:#f3f4f6;text-align:left;font-size:13px;color:#374151">
