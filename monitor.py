@@ -234,8 +234,20 @@ def num(price):
         return None
 
 
+def cursym(price):
+    """Leading currency symbol/code of a price string, e.g. '$', 'S$', 'USD'."""
+    m = re.match(r"[^\d]*", (price or "").strip())
+    return (m.group(0).strip() if m else "")
+
+
 def diff(prev, cur):
-    """Compare two snapshots keyed by target name -> list of change dicts."""
+    """Compare two snapshots keyed by target name -> list of change dicts.
+
+    Guards against false alarms — the #1 way a monitoring service loses trust:
+    a change is only reported if the currency symbol is consistent (a $→S$ flip is
+    an extraction glitch, not a real move), and implausibly large swings are flagged
+    for a manual check rather than reported as confident intel.
+    """
     changes = []
     prev_map = {r["name"]: r for r in (prev or {}).get("rows", [])}
     for row in cur["rows"]:
@@ -245,11 +257,17 @@ def diff(prev, cur):
             continue
         op, np_ = num(old.get("price")), num(row.get("price"))
         if op is not None and np_ is not None and op != np_:
+            os_, ns_ = cursym(old.get("price")), cursym(row.get("price"))
+            if os_ and ns_ and os_ != ns_:
+                continue  # currency symbol changed → extraction glitch, not a real price move
             pct = (np_ - op) / op * 100 if op else 0
+            detail = f"{old.get('price')} → {row.get('price')} ({pct:+.1f}%)"
+            if abs(pct) >= 60:
+                detail += " — unusually large, worth a manual check"
             changes.append({
                 "name": row["name"],
                 "kind": "price_up" if np_ > op else "price_down",
-                "detail": f"{old.get('price')} → {row.get('price')} ({pct:+.1f}%)",
+                "detail": detail,
             })
         if old.get("in_stock") and not row.get("in_stock"):
             changes.append({"name": row["name"], "kind": "oos", "detail": "now OUT of stock"})
