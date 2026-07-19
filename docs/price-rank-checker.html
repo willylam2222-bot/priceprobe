@@ -88,6 +88,7 @@
     </div>
     <div class="ends"><span id="lowend"></span><span>median <b id="medend"></b></span><span id="highend"></span></div>
     <div class="insight" id="insight"></div>
+    <div class="insight" id="watch" style="display:none;border-left:3px solid var(--accent)"></div>
     <div class="share" id="share" style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px">
       <button onclick="copyShare()" style="flex:1;min-width:150px;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;cursor:pointer" id="copybtn">📋 Copy my result to share</button>
       <a id="tweet" href="#" target="_blank" rel="noopener" style="flex:1;min-width:150px;text-align:center;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;text-decoration:none">𝕏 Post my rank</a>
@@ -129,6 +130,16 @@ function brandContext(cat, price){
   else mid=`You're pricier than every brand we track here — above <b>${priciest.name}</b> (${money(priciest.median)}).`;
   return `${mid} Across the set: <b>${cheapest.name}</b> is the value end (${money(cheapest.median)}), <b>${priciest.name}</b> the premium end (${money(priciest.median)}).`;
 }
+function nearestBrands(cat, price){
+  const list=(BRANDS[cat]||[]).slice();
+  if(list.length<3) return null;
+  const near=list.sort((a,b)=>Math.abs(a.median-price)-Math.abs(b.median-price)).slice(0,3).sort((a,b)=>a.median-b.median);
+  return near.map(b=>{
+    const d=b.median-price;
+    const rel=Math.abs(d)<0.5?"about the same":(d<0?money(-d)+" cheaper":money(d)+" pricier");
+    return `<b>${b.name}</b> <span style="color:#64748b">(${money(b.median)}, ${rel})</span>`;
+  });
+}
 function pctFor(price, pts){
   if(price<=pts[0][1]) return 1;
   if(price>=pts[pts.length-1][1]) return 99;
@@ -161,6 +172,11 @@ function rank(){
   document.getElementById('highend').textContent="priciest "+money(d.pts[d.pts.length-1][1]);
   const bc=brandContext(cat, price);
   document.getElementById('insight').innerHTML="<b>What this means:</b> "+tone+(bc?"<br><br><b>Real brands for scale:</b> "+bc:"");
+  const nb=nearestBrands(cat, price), watchEl=document.getElementById('watch');
+  if(nb){
+    watchEl.style.display='block';
+    watchEl.innerHTML="<b>Who to watch:</b> the rivals priced closest to you are "+nb.join(" · ")+". A discount from any of them and you're suddenly the pricier option — often before you notice. Those are exactly the ones worth watching daily.";
+  } else { watchEl.style.display='none'; }
   // shareable result
   const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce",skincare:"skincare",candles:"candle",pettreats:"pet treat",makeup:"makeup",bathbody:"bath & body"}[cat];
   const url="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html";
