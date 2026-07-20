@@ -317,9 +317,48 @@ def sparkline(values, w=84, h=22):
             f'stroke-width="1.5"/><circle cx="{w}" cy="{ly:.1f}" r="2.2" fill="{color}"/></svg>')
 
 
+def _decline_runs(series):
+    s = [v for v in series if v is not None]
+    runs = 0
+    for i in range(len(s) - 1, 0, -1):
+        if s[i] < s[i-1]:
+            runs += 1
+        else:
+            break
+    return runs
+
+
+def analyst_read(changes, hist):
+    """Turn raw changes into 1-3 plain-English strategic observations — the advisory layer."""
+    obs = []
+    downs = [c for c in changes if c["kind"] == "price_down"]
+    ups = [c for c in changes if c["kind"] == "price_up"]
+    oos = [c for c in changes if c["kind"] == "oos"]
+    for c in oos:
+        obs.append(f"🎯 <b>{html.escape(c['name'])}</b> just went out of stock — a window to capture buyers looking for that right now, before they restock.")
+    for c in downs:
+        runs = _decline_runs(hist.get(c["name"], []))
+        if runs >= 2:
+            obs.append(f"📉 <b>{html.escape(c['name'])}</b> has dropped {runs} runs in a row — that reads as a deliberate repositioning, not a flash sale. Worth deciding whether to respond or hold your story.")
+            break
+    if len(downs) >= 2 and len(downs) > len(ups):
+        obs.append(f"⚔️ {len(downs)} competitors cut prices this period — the category is leaning into price competition. If you're holding steady, you just became the relatively pricier option.")
+    elif len(ups) >= 2 and len(ups) > len(downs):
+        obs.append(f"📈 {len(ups)} competitors raised prices — room may be opening to hold or nudge yours up without losing position.")
+    return obs[:3]
+
+
 def render(cur, changes, errors):
     ts = cur["taken_at"]
     hist = price_history()
+    reads = analyst_read(changes, hist)
+    read_html = ""
+    if reads:
+        lis = "".join(f'<li style="margin:6px 0">{o}</li>' for o in reads)
+        read_html = (f'<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;'
+                     f'padding:16px 18px;margin:16px 0"><div style="font-weight:700;color:#3730a3;'
+                     f'margin-bottom:6px">This week\'s read</div>'
+                     f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#3730a3">{lis}</ul></div>')
     rows_html = ""
     chg_by_name = {}
     for c in changes:
@@ -385,6 +424,7 @@ def render(cur, changes, errors):
   </div>
   <p style="font-size:16px;margin:10px 0 0"><b>{summary}.</b> Monitoring {len(cur['rows'])} product(s).</p>
   {moved_html}
+  {read_html}
   {err_html}
   <table style="width:100%;border-collapse:collapse;margin-top:18px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
     <thead><tr style="background:#f3f4f6;text-align:left;font-size:13px;color:#374151">
