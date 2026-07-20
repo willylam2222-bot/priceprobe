@@ -92,7 +92,9 @@
     <div class="share" id="share" style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px">
       <button onclick="copyShare()" style="flex:1;min-width:150px;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;cursor:pointer" id="copybtn">📋 Copy my result to share</button>
       <a id="tweet" href="#" target="_blank" rel="noopener" style="flex:1;min-width:150px;text-align:center;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;text-decoration:none">𝕏 Post my rank</a>
+      <button onclick="saveCard()" style="flex:1;min-width:150px;background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;padding:11px;border-radius:10px;cursor:pointer" id="cardbtn">📸 Save shareable card</button>
     </div>
+    <canvas id="card" width="1080" height="1080" style="display:none"></canvas>
     <a class="cta" style="background:#fff;color:var(--accent);border:1px solid #c7d2fe" href="mailto:PriceProbe_sg@proton.me?subject=Free%20competitor%20snapshot&body=My%20store%20URL%3A%20%0AOne%20competitor%20I%20care%20about%3A%20%0A%0A(I%27ll%20send%20back%20a%20full%20side-by-side%20price%20comparison%20within%2024h%20%E2%80%94%20free.)">📩 Free: email me your store + one rival → I'll send a full comparison in 24h</a>
     <a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Want it watched daily, with alerts when they move? → $49</a>
     <p class="foot-note">Want the full breakdown for your category? See the <a href="dtc-pricing-index-2026.html">2026 DTC Pricing Index</a>.</p>
@@ -181,6 +183,8 @@ function rank(){
   const catName={coffee:"specialty coffee",tea:"loose-leaf tea",supplements:"supplement",hotsauce:"hot sauce",skincare:"skincare",candles:"candle",pettreats:"pet treat",makeup:"makeup",bathbody:"bath & body"}[cat];
   const url="https://willylam2222-bot.github.io/priceprobe/price-rank-checker.html";
   window._shareText=`My ${catName} is priced higher than ~${pct}% of the market (${money(price)}). Where does yours rank? Free tool: ${url}`;
+  const near2=(BRANDS[cat]||[]).slice().sort((a,b)=>Math.abs(a.median-price)-Math.abs(b.median-price)).slice(0,2).sort((a,b)=>a.median-b.median).map(b=>b.name+" ("+money(b.median)+")");
+  window._card={catName, price, pct, verdict, nb:near2};
   document.getElementById('tweet').href="https://twitter.com/intent/tweet?text="+encodeURIComponent(window._shareText);
   document.getElementById('copybtn').textContent="📋 Copy my result to share";
   document.getElementById('result').style.display='block';
@@ -192,6 +196,48 @@ function copyShare(){
     document.getElementById('copybtn').textContent="✓ Copied!";
     setTimeout(()=>{document.getElementById('copybtn').textContent="📋 Copy my result to share";},2000);
   }).catch(()=>{ prompt("Copy your result:", t); });
+}
+function _wrap(x,text,fx,fy,maxw,lh){
+  const words=text.split(' '); let line='', y=fy;
+  for(const w of words){ const t=line?line+' '+w:w;
+    if(x.measureText(t).width>maxw && line){ x.fillText(line,fx,y); line=w; y+=lh; } else line=t; }
+  x.fillText(line,fx,y); return y;
+}
+function drawCard(){
+  const d=window._card; if(!d) return null;
+  const c=document.getElementById('card'), x=c.getContext('2d'), W=1080,H=1080,P=80;
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+  x.fillStyle='#4f46e5'; x.fillRect(0,0,W,16);
+  x.textAlign='left'; x.textBaseline='alphabetic';
+  x.fillStyle='#0f172a'; x.font='800 48px -apple-system,Segoe UI,Roboto,sans-serif';
+  x.fillText('Price',P,140); const pw=x.measureText('Price').width;
+  x.fillStyle='#4f46e5'; x.fillText('Probe',P+pw,140);
+  x.fillStyle='#94a3b8'; x.font='400 30px -apple-system,Segoe UI,Roboto,sans-serif';
+  x.fillText('free pricing check',P,185);
+  x.fillStyle='#64748b'; x.font='700 32px -apple-system,Segoe UI,Roboto,sans-serif';
+  x.fillText((d.catName||'').toUpperCase(),P,320);
+  const verdict=(d.verdict||'').replace(/[^\x00-\x7F]/g,'').trim();
+  x.fillStyle='#0f172a'; x.font='800 76px -apple-system,Segoe UI,Roboto,sans-serif';
+  let yy=_wrap(x,verdict,P,410,W-2*P,88);
+  x.fillStyle='#334155'; x.font='400 40px -apple-system,Segoe UI,Roboto,sans-serif';
+  yy=_wrap(x,'My '+money(d.price)+' '+d.catName+' is priced higher than ~'+d.pct+'% of the market.',P,yy+95,W-2*P,54);
+  const by=yy+90, bw=W-2*P;
+  x.fillStyle='#e2e8f0'; x.fillRect(P,by,bw,16);
+  x.fillStyle='#4f46e5'; const mx=P+Math.max(0,Math.min(100,d.pct))/100*bw;
+  x.beginPath(); x.arc(mx,by+8,22,0,7); x.fill();
+  x.fillStyle='#94a3b8'; x.font='400 26px sans-serif';
+  x.fillText('value',P,by+62); x.textAlign='right'; x.fillText('premium',W-P,by+62); x.textAlign='left';
+  if(d.nb&&d.nb.length){ x.fillStyle='#475569'; x.font='400 32px -apple-system,Segoe UI,Roboto,sans-serif';
+    _wrap(x,'Priced near: '+d.nb.join('  ·  '),P,by+150,W-2*P,44); }
+  x.fillStyle='#94a3b8'; x.font='400 30px -apple-system,Segoe UI,Roboto,sans-serif';
+  x.fillText('willylam2222-bot.github.io/priceprobe',P,H-70);
+  return c;
+}
+function saveCard(){
+  const c=drawCard(); if(!c) return;
+  const a=document.createElement('a'); a.download='my-priceprobe-rank.png'; a.href=c.toDataURL('image/png'); a.click();
+  const b=document.getElementById('cardbtn'); b.textContent='✓ Saved!';
+  setTimeout(()=>{b.textContent='📸 Save shareable card';},2000);
 }
 document.getElementById('price').addEventListener('keydown',e=>{ if(e.key==='Enter') rank(); });
 </script>
