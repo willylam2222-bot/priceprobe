@@ -1,77 +1,57 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sample competitor price report · PriceProbe</title>
-<meta name="description" content="A real example of the competitor price report PriceProbe delivers — live prices and sales pulled from competing stores, in a clean one-page snapshot.">
-<meta property="og:title" content="Sample competitor price report — PriceProbe">
-<meta property="og:description" content="See exactly what a PriceProbe competitor price report looks like. Real data, one page.">
-<style>
-  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--bg:#f8fafc;--green:#067647;--red:#dc2626}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.6}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  a{color:var(--accent)}
-  nav{border-bottom:1px solid var(--line)}
-  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1000px}
-  .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
-  .logo span{color:var(--accent)}
-  header{padding:46px 0 10px}
-  .tag{display:inline-block;background:#eef2ff;color:#4338ca;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;margin-bottom:16px}
-  h1{font-size:30px;letter-spacing:-.02em;margin-bottom:8px}
-  .meta{color:var(--muted);font-size:14px;margin-bottom:26px}
-  h2{font-size:20px;margin:30px 0 12px}
-  table{border-collapse:collapse;width:100%;margin:0 0 10px;font-size:15px}
-  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left}
-  th{background:var(--bg);font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
-  td.price{font-weight:600;font-variant-numeric:tabular-nums}
-  .sale{color:var(--red);font-weight:600}
-  .note{color:var(--muted);font-size:13px;margin:6px 0 0}
-  .insight{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:18px 0}
-  .insight b{color:var(--ink)}
-  .cta{display:block;background:var(--accent);color:#fff;text-decoration:none;text-align:center;font-weight:600;padding:15px;border-radius:10px;margin:30px 0 10px;font-size:16px}
-  footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px;text-align:center;margin-top:30px}
-</style>
-</head>
-<body>
-<nav><div class="wrap"><a class="logo" href="./">Price<span>Probe</span></a><a href="https://willyverse188.gumroad.com/l/kphhe" style="font-size:14px;font-weight:600">Get yours →</a></div></nav>
-<div class="wrap">
-<header>
-  <span class="tag">SAMPLE REPORT</span>
-  <h1>Competitor Price Snapshot — Specialty Coffee</h1>
-  <p class="meta">Example category: single-origin coffee · 4 competing stores · live prices pulled directly from each store · this is exactly the format you receive.</p>
-</header>
-
-<h2>Live prices across your competitors</h2>
-<table>
-  <thead><tr><th>Store</th><th>Product</th><th>Price</th></tr></thead>
-  <tbody>
-    <tr><td>Onyx Coffee Lab</td><td>Ecuador El Dorado Gesha</td><td class="price">$18.00</td></tr>
-    <tr><td>Onyx Coffee Lab</td><td>Decaf Ethiopia Suke Quto</td><td class="price">$26.00</td></tr>
-    <tr><td>Counter Culture</td><td>Mabono Honey Processed</td><td class="price">$28.00</td></tr>
-    <tr><td>Counter Culture</td><td>Sipi — Natural Sundried</td><td class="price">$28.00</td></tr>
-    <tr><td>Verve Coffee</td><td>Costa Rica Macho</td><td class="price">$26.75</td></tr>
-    <tr><td>Verve Coffee</td><td>Honduras Yojoa</td><td class="price">$23.00</td></tr>
-    <tr><td>Ruby Coffee</td><td>Colombia Luz Divina Fierro</td><td class="price">$18.50 <span class="sale">↓ was $30.00</span></td></tr>
-    <tr><td>Ruby Coffee</td><td>Peru David Flores La Neblina</td><td class="price">$21.50</td></tr>
-  </tbody>
-</table>
-<p class="note">Prices captured live from each store's public catalog on the report date. Full report covers every product, not a sample.</p>
-
-<h2>What it tells you at a glance</h2>
-<div class="insight">
-  <p>• <b>Single-origin bags cluster at $23–$28</b> — anything you price above $28 needs a story; below $23 you're the value pick.</p>
-  <p>• <b>Ruby is running a sale</b> — a single-origin dropped from $30.00 to $18.50 (−38%). That's a competitor actively taking share this week.</p>
-  <p>• <b>Onyx anchors the low end</b> at $18 on a Gesha — unusually aggressive for that tier, worth watching.</p>
-</div>
-
-<h2>How you'd get this every week</h2>
-<p>PriceProbe pulls these numbers automatically and flags what changed since last time — price moves, new sales, and restocks — so you see a competitor's move the day it happens, not weeks later. You send the competitor URLs once; the report comes back clean.</p>
-
-<a class="cta" href="https://willyverse188.gumroad.com/l/kphhe">Get a report for your store — send your competitor URLs →</a>
-<p class="note" style="text-align:center">Prefer to run it yourself? The free open-source version is on <a href="https://github.com/willylam2222-bot/priceprobe">GitHub</a>.</p>
-</div>
-<footer>PriceProbe · an independent tool, not affiliated with Shopify or the stores shown · prices are public catalog data captured for illustration</footer>
-</body>
-</html>
+<title>Sample Competitor Price Report — PriceProbe · Competitor Price Intel — 2026-07-24 08:00</title></head>
+<body style="margin:0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f9fafb;color:#111827">
+<div style="max-width:860px;margin:0 auto;padding:14px 20px 0"><div style="background:#0f172a;color:#fff;border-radius:10px;padding:12px 16px;font-size:14px">📋 <b>Sample report</b> (example brands shown). This is what a PriceProbe customer receives — yours tracks <b>your</b> real competitors, delivered daily to email / Slack / Discord. <a href="https://willyverse188.gumroad.com/l/kphhe" style="color:#a5b4fc">Get it set up →</a></div></div><div style="max-width:860px;margin:0 auto;padding:16px 20px 32px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <h1 style="margin:0;font-size:24px">Competitor Price &amp; Stock Intel</h1>
+    <span style="color:#6b7280;font-size:13px">Generated 2026-07-24 08:00</span>
+  </div>
+  <p style="font-size:16px;margin:10px 0 0"><b>2 change(s) since your last report.</b> Monitoring 5 product(s).</p>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:15px;margin-bottom:10px"><span style="color:#067647;font-weight:700">▼ 1 price down</span> &nbsp;·&nbsp; <span style="color:#6b7280;font-weight:700">✕ 1 out of stock</span></div><ul style="margin:0;padding-left:18px;font-size:14px;color:#374151"><li style="margin:5px 0"><span style="color:#067647;font-weight:600">▼ price down</span> — <b>Northvale Roasters — House Espresso 12oz</b>: $20.00 → $19.00 (-5.0%)</li><li style="margin:5px 0"><span style="color:#6b7280;font-weight:600">✕ out of stock</span> — <b>Cedarwood — Southern Weather</b>: now OUT of stock</li></ul></div>
+  <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:16px 18px;margin:16px 0"><div style="font-weight:700;color:#3730a3;margin-bottom:6px">This week's read</div><ul style="margin:0;padding-left:18px;font-size:14px;color:#3730a3"><li style="margin:6px 0">🎯 <b>Cedarwood — Southern Weather</b> just went out of stock — a window to capture buyers looking for that right now, before they restock.</li><li style="margin:6px 0">📉 <b>Northvale Roasters — House Espresso 12oz</b> has dropped 3 runs in a row — that reads as a deliberate repositioning, not a flash sale. Worth deciding whether to respond or hold your story.</li></ul></div>
+  
+  <table style="width:100%;border-collapse:collapse;margin-top:18px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+    <thead><tr style="background:#f3f4f6;text-align:left;font-size:13px;color:#374151">
+      <th style="padding:12px 14px">Product</th><th style="padding:12px 14px">Price</th>
+      <th style="padding:12px 14px">Stock</th><th style="padding:12px 14px">Change</th>
+    </tr></thead>
+    <tbody style="font-size:14px">
+        <tr style="background:#fffdf5;border-left:4px solid #067647">
+          <td><b>Northvale Roasters — House Espresso 12oz</b><br>
+              <a href="https://example-roaster-a.com/p" style="color:#6b7280;font-size:12px">https://example-roaster-a.com/p</a></td>
+          <td style="font-size:15px">$19.00<svg width="84" height="22" style="vertical-align:middle;display:block;margin-top:3px" aria-label="price trend"><polyline points="0.0,2.0 21.0,2.0 42.0,8.0 63.0,14.0 84.0,20.0" fill="none" stroke="#067647" stroke-width="1.5"/><circle cx="84" cy="20.0" r="2.2" fill="#067647"/></svg></td>
+          <td>In stock</td>
+          <td><span style="background:#067647;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-right:6px;white-space:nowrap">▼ price down</span><div style="color:#6b7280;font-size:12px;margin-top:4px">$20.00 → $19.00 (-5.0%)</div></td>
+        </tr>
+        <tr style="background:#fffdf5;border-left:4px solid #6b7280">
+          <td><b>Cedarwood — Southern Weather</b><br>
+              <a href="https://example-roaster-d.com/p" style="color:#6b7280;font-size:12px">https://example-roaster-d.com/p</a></td>
+          <td style="font-size:15px">$18.00<svg width="84" height="22" style="vertical-align:middle;display:block;margin-top:3px" aria-label="price trend"><polyline points="0.0,20.0 21.0,20.0 42.0,20.0 63.0,20.0 84.0,20.0" fill="none" stroke="#6b7280" stroke-width="1.5"/><circle cx="84" cy="20.0" r="2.2" fill="#6b7280"/></svg></td>
+          <td><b style="color:#b42318">Out of stock</b></td>
+          <td><span style="background:#6b7280;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-right:6px;white-space:nowrap">✕ out of stock</span><div style="color:#6b7280;font-size:12px;margin-top:4px">now OUT of stock</div></td>
+        </tr>
+        <tr style="background:#fff;border-left:4px solid transparent">
+          <td><b>Harbor &amp; Oak — Streetside 12oz</b><br>
+              <a href="https://example-roaster-b.com/p" style="color:#6b7280;font-size:12px">https://example-roaster-b.com/p</a></td>
+          <td style="font-size:15px">$19.00<svg width="84" height="22" style="vertical-align:middle;display:block;margin-top:3px" aria-label="price trend"><polyline points="0.0,20.0 21.0,20.0 42.0,20.0 63.0,20.0 84.0,20.0" fill="none" stroke="#6b7280" stroke-width="1.5"/><circle cx="84" cy="20.0" r="2.2" fill="#6b7280"/></svg></td>
+          <td>In stock</td>
+          <td><div style="color:#6b7280;font-size:12px;margin-top:4px"></div></td>
+        </tr>
+        <tr style="background:#fff;border-left:4px solid transparent">
+          <td><b>Meridian Coffee — Bold Trouble</b><br>
+              <a href="https://example-roaster-c.com/p" style="color:#6b7280;font-size:12px">https://example-roaster-c.com/p</a></td>
+          <td style="font-size:15px">$16.00<svg width="84" height="22" style="vertical-align:middle;display:block;margin-top:3px" aria-label="price trend"><polyline points="0.0,2.0 21.0,8.0 42.0,14.0 63.0,20.0 84.0,20.0" fill="none" stroke="#067647" stroke-width="1.5"/><circle cx="84" cy="20.0" r="2.2" fill="#067647"/></svg></td>
+          <td>In stock</td>
+          <td><div style="color:#6b7280;font-size:12px;margin-top:4px"></div></td>
+        </tr>
+        <tr style="background:#fff;border-left:4px solid transparent">
+          <td><b>Ironwood — Trailhead Blend</b><br>
+              <a href="https://example-roaster-e.com/p" style="color:#6b7280;font-size:12px">https://example-roaster-e.com/p</a></td>
+          <td style="font-size:15px">$17.00<svg width="84" height="22" style="vertical-align:middle;display:block;margin-top:3px" aria-label="price trend"><polyline points="0.0,20.0 21.0,20.0 42.0,20.0 63.0,20.0 84.0,20.0" fill="none" stroke="#6b7280" stroke-width="1.5"/><circle cx="84" cy="20.0" r="2.2" fill="#6b7280"/></svg></td>
+          <td>In stock</td>
+          <td><div style="color:#6b7280;font-size:12px;margin-top:4px"></div></td>
+        </tr></tbody>
+  </table>
+  <p style="color:#9ca3af;font-size:12px;margin-top:24px">PriceProbe · automated competitor monitoring · run daily for fresh intel.</p>
+</div></body></html>
