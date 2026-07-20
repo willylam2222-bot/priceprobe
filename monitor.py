@@ -286,8 +286,40 @@ KIND_STYLE = {
 }
 
 
+def price_history(n=12):
+    """name -> list of numeric prices across the last n snapshots (oldest→newest)."""
+    files = sorted(f for f in os.listdir(SNAP_DIR) if f.endswith(".json"))[-n:]
+    series = {}
+    for fn in files:
+        try:
+            with open(os.path.join(SNAP_DIR, fn)) as f:
+                snap = json.load(f)
+        except Exception:
+            continue
+        for r in snap.get("rows", []):
+            series.setdefault(r["name"], []).append(num(r.get("price")))
+    return series
+
+
+def sparkline(values, w=84, h=22):
+    """Tiny inline SVG price trend — green if trending down, red if up."""
+    vals = [v for v in values if v is not None]
+    if len(vals) < 2:
+        return ""
+    lo, hi = min(vals), max(vals)
+    rng = (hi - lo) or 1
+    n = len(vals)
+    pts = " ".join(f"{i/(n-1)*w:.1f},{h-((v-lo)/rng)*(h-4)-2:.1f}" for i, v in enumerate(vals))
+    color = "#067647" if vals[-1] < vals[0] else "#b42318" if vals[-1] > vals[0] else "#6b7280"
+    ly = h - ((vals[-1]-lo)/rng)*(h-4) - 2
+    return (f'<svg width="{w}" height="{h}" style="vertical-align:middle;display:block;margin-top:3px" '
+            f'aria-label="price trend"><polyline points="{pts}" fill="none" stroke="{color}" '
+            f'stroke-width="1.5"/><circle cx="{w}" cy="{ly:.1f}" r="2.2" fill="{color}"/></svg>')
+
+
 def render(cur, changes, errors):
     ts = cur["taken_at"]
+    hist = price_history()
     rows_html = ""
     chg_by_name = {}
     for c in changes:
@@ -309,7 +341,7 @@ def render(cur, changes, errors):
         <tr style="background:{rowbg};border-left:4px solid {edge}">
           <td><b>{html.escape(row['name'])}</b><br>
               <a href="{html.escape(row['url'])}" style="color:#6b7280;font-size:12px">{html.escape(row['url'][:60])}</a></td>
-          <td style="font-size:15px">{html.escape(row.get('price') or '—')}</td>
+          <td style="font-size:15px">{html.escape(row.get('price') or '—')}{sparkline(hist.get(row['name'], []))}</td>
           <td>{stock}</td>
           <td>{badge}<div style="color:#6b7280;font-size:12px;margin-top:4px">{detail}</div></td>
         </tr>"""
